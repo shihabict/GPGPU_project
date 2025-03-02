@@ -16,9 +16,14 @@ fps = int(cap.get(cv2.CAP_PROP_FPS))
 original_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 original_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-# Define the codec and create a VideoWriter object to save the output video
+# Define the codec and create VideoWriter objects to save the output videos
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for .mp4 files
-out = cv2.VideoWriter('output_video.mp4', fourcc, fps, (display_width * 2, display_height))
+
+# VideoWriter for the concatenated video (side-by-side layout)
+out_combined = cv2.VideoWriter('mog2_combined_video.mp4', fourcc, fps, (display_width * 2, display_height))
+
+# VideoWriter for the background subtraction video (foreground mask only)
+out_fgmask = cv2.VideoWriter('mog2_fgmask_video.mp4', fourcc, fps, (display_width, display_height), isColor=False)
 
 while True:
     ret, frame = cap.read()
@@ -45,8 +50,11 @@ while True:
     # Concatenate the original frame and the foreground mask side by side
     combined_frame = cv2.hconcat([frame_resized, fgmask_colored])
 
-    # Write the combined frame to the output video file
-    out.write(combined_frame)
+    # Write the combined frame to the concatenated video file
+    out_combined.write(combined_frame)
+
+    # Write the foreground mask to the background subtraction video file
+    out_fgmask.write(fgmask_resized)
 
     # Display the combined frame
     cv2.imshow('Input Video | Foreground Mask', combined_frame)
@@ -57,5 +65,6 @@ while True:
 
 # Release everything when done
 cap.release()
-out.release()
+out_combined.release()
+out_fgmask.release()
 cv2.destroyAllWindows()

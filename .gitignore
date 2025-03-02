@@ -13,6 +13,7 @@ __pycache__/
 *.swo
 *.jpg
 *.mp4
+*.pt
 
 # Ignore IDE-specific files
 .vscode/
