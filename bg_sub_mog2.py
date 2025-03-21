@@ -4,12 +4,11 @@ import numpy as np
 # Create a MOG2 background subtractor
 fgbg = cv2.createBackgroundSubtractorMOG2()
 
-# Capture video
 cap = cv2.VideoCapture('data/los_angeles.mp4')
 
 # Define the desired width and height for the resized frames
-display_width = 640  # Adjust as needed
-display_height = 360  # Adjust as needed
+display_width = 640
+display_height = 360
 
 # Get the original video's frame rate and dimensions
 fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -17,7 +16,7 @@ original_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 original_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # Define the codec and create VideoWriter objects to save the output videos
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for .mp4 files
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
 # VideoWriter for the concatenated video (side-by-side layout)
 out_combined = cv2.VideoWriter('mog2_combined_video.mp4', fourcc, fps, (display_width * 2, display_height))

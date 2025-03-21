@@ -1,53 +1,82 @@
 import cv2
 import numpy as np
 
-# KNN
-KNN_subtractor = cv2.createBackgroundSubtractorKNN(detectShadows=True)  # detectShadows=True: exclude shadow areas from the objects you detected
+def adaptive_thresholding(image, block_size, C):
 
-# MOG2
-MOG2_subtractor = cv2.createBackgroundSubtractorMOG2(detectShadows=True)  # exclude shadow areas from the objects you detected
+    # Ensure the block size is odd
+    if block_size % 2 == 0:
+        block_size += 1
 
-# Choose your subtractor
-bg_subtractor = MOG2_subtractor
+    # Get image dimensions
+    height, width = image.shape
 
-# Read the image
-image = cv2.imread("resources/image.jpg")  # Replace with your image path
+    # Create an empty output image
+    output = np.zeros_like(image)
 
-# Apply background subtraction to the image
-foreground_mask = bg_subtractor.apply(image)
+    # Pad the image to handle border pixels
+    pad = block_size // 2
+    padded_image = cv2.copyMakeBorder(image, pad, pad, pad, pad, cv2.BORDER_REFLECT)
 
-# Apply adaptive thresholding to the foreground mask
-adaptive_threshold = cv2.adaptiveThreshold(
-    foreground_mask,  # Input image (foreground mask)
-    255,  # Maximum value to use with THRESH_BINARY
-    cv2.ADAPTIVE_THRESH_GAUSSIAN_C,  # Adaptive method (Gaussian-weighted sum)
-    cv2.THRESH_BINARY,  # Threshold type
-    11,  # Block size (size of a pixel neighborhood)
-    2,  # Constant subtracted from the mean
-)
+    # Apply adaptive thresholding
+    for y in range(height):
+        for x in range(width):
+            # Extract the local neighborhood
+            neighborhood = padded_image[y:y + block_size, x:x + block_size]
+            # Compute the mean of the neighborhood
+            mean = np.mean(neighborhood)
+            # Compute the threshold
+            threshold = mean - C
+            # Classify the pixel
+            if image[y, x] > threshold:
+                output[y, x] = 255  # Foreground
+            else:
+                output[y, x] = 0  # Background
 
-# Dilation to expand or thicken regions of interest in the image
-dilated = cv2.dilate(adaptive_threshold, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=2)
+    return output
 
-# Find contours
-contours, hier = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# Load an image in grayscale mode
+image = cv2.imread("../data/traffic-less-but-more-speeding.jpg", cv2.IMREAD_GRAYSCALE)
 
-# Draw bounding boxes around detected objects
-for contour in contours:
-    # If the area exceeds a certain value, draw a bounding box
-    if cv2.contourArea(contour) > 50:
-        (x, y, w, h) = cv2.boundingRect(contour)
-        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 0), 2)
+# Check if the image was loaded successfully
+if image is None:
+    print("Error: Could not load image.")
+    exit()
 
-# Save the results
-cv2.imwrite("foreground_mask.jpg", foreground_mask)
-cv2.imwrite("adaptive_threshold.jpg", adaptive_threshold)
-cv2.imwrite("detection.jpg", image)
+# Define parameters for adaptive thresholding
+block_size = 11  # Size of the local neighborhood (must be odd)
+C = 2  # Constant subtracted from the mean
 
-# Display the results (optional)
-cv2.imshow("Foreground Mask", foreground_mask)
-cv2.imshow("Adaptive Threshold", adaptive_threshold)
-cv2.imshow("Detection", image)
+# Apply adaptive thresholding
+thresholded_image = adaptive_thresholding(image, block_size, C)
 
+# Convert the thresholded image to 3 channels (to match the original image if it's not grayscale)
+thresholded_image_bgr = cv2.cvtColor(thresholded_image, cv2.COLOR_GRAY2BGR)
+
+# Convert the original grayscale image to 3 channels (for side-by-side display)
+if len(image.shape) == 2:
+    image_bgr = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+else:
+    image_bgr = image
+
+# Concatenate the original and thresholded images side by side
+side_by_side = np.hstack((image_bgr, thresholded_image_bgr))
+
+# Resize the concatenated image to fit the screen
+scale_percent = 50  # Resize to 50% of the original size
+width = int(side_by_side.shape[1] * scale_percent / 100)
+height = int(side_by_side.shape[0] * scale_percent / 100)
+resized_side_by_side = cv2.resize(side_by_side, (width, height))
+
+# Create a resizable window
+cv2.namedWindow("Original vs Adaptive Thresholded", cv2.WINDOW_NORMAL)
+
+# Display the resized images side by side
+cv2.imshow("Original vs Adaptive Thresholded", resized_side_by_side)
+
+# Save the output image
+cv2.imwrite("output_thresholded_image.jpg", thresholded_image)
+
+# Wait for a key press and close the window
 cv2.waitKey(0)
+cv2.destroyAllWindows()
 cv2.destroyAllWindows()
