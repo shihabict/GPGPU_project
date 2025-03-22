@@ -4,7 +4,7 @@ import cupy as cp
 import time
 
 # Load image
-image = cv2.imread('detection.jpg', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('input_img.jpg', cv2.IMREAD_GRAYSCALE)
 if image is None:
     raise ValueError("Could not load image!")
 
@@ -15,19 +15,23 @@ print(f"Image Shape: {image.shape}")
 image_gpu = cp.asarray(image)  # Copy image to GPU
 output_gpu = cp.zeros((height, width), dtype=cp.uint8)
 
-# CUDA kernel source code for Gaussian-based adaptive thresholding
+# CUDA kernel source code for adaptive Gaussian thresholding
 cuda_kernel = r'''
-extern "C" __global__ void adaptive_threshold(const unsigned char *input, unsigned char *output, int width, int height, int neighborhood_size, float sigma) {
+extern "C" __global__ void adaptive_gaussian_threshold(
+    const unsigned char *input, unsigned char *output, int width, int height, int neighborhood_size, float sigma
+) {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (x >= width || y >= height) return;
 
     float sum = 0.0f;
-    float weight_sum = 0.0f;
+    float weight_sum = 0.0f; // Sum of Gaussian weights for normalization
+    int radius = neighborhood_size;
 
-    for (int i = -neighborhood_size; i <= neighborhood_size; i++) {
-        for (int j = -neighborhood_size; j <= neighborhood_size; j++) {
+    // Compute Gaussian weights and weighted sum
+    for (int i = -radius; i <= radius; i++) {
+        for (int j = -radius; j <= radius; j++) {
             int idx_x = x + j;
             int idx_y = y + i;
 
@@ -37,15 +41,18 @@ extern "C" __global__ void adaptive_threshold(const unsigned char *input, unsign
 
             // Compute Gaussian weight
             float weight = expf(-(i * i + j * j) / (2 * sigma * sigma));
-            sum += input[idx_y * width + idx_x] * weight;
             weight_sum += weight;
+
+            // Add weighted pixel value to sum
+            sum += input[idx_y * width + idx_x] * weight;
         }
     }
 
-    float threshold = sum / weight_sum;
+    // Normalize the sum by the total weight
+    sum /= weight_sum;
 
     // Apply thresholding
-    if (input[y * width + x] > threshold) {
+    if (input[y * width + x] > sum) {
         output[y * width + x] = 255; // Foreground
     } else {
         output[y * width + x] = 0;   // Background
@@ -55,7 +62,7 @@ extern "C" __global__ void adaptive_threshold(const unsigned char *input, unsign
 
 # Compile CUDA kernel
 module = cp.RawModule(code=cuda_kernel)
-kernel = module.get_function("adaptive_threshold")
+kernel = module.get_function("adaptive_gaussian_threshold")
 
 # Define grid/block dimensions
 block_size = (16, 16)  # Threads per block (2D)
@@ -64,11 +71,9 @@ grid_size = (
     (height + block_size[1] - 1) // block_size[1]
 )
 
-# Set neighborhood size (e.g., 3x3 neighborhood)
-neighborhood_size = 1
-
-# Set Gaussian sigma (standard deviation)
-sigma = 1.0  # Adjust this value to control the Gaussian spread
+# Set neighborhood size and sigma for Gaussian kernel
+neighborhood_size = 3  # e.g., 3x3 or 5x5 neighborhood
+sigma = 1.0  # Standard deviation for Gaussian kernel
 
 # Measure execution time
 start_time = time.time()  # Start timer
@@ -91,9 +96,9 @@ execution_time = end_time - start_time
 output = cp.asnumpy(output_gpu)
 
 # Save output image
-cv2.imwrite('output_image_cuda_gaussian.png', output)
+cv2.imwrite('output_image_gaussian_cuda.png', output)
 
 # Print execution time
 print(f"Execution Time: {execution_time * 1000:.2f} ms")
 
-print("Output image saved as output_image_cuda_gaussian.png")
+print("Output image saved as output_image_gaussian_cuda.png")

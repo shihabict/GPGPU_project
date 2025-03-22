@@ -2,19 +2,19 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 
-img = cv.imread('/media/shihab-uddin/Projects Parition/UAH/Spring 2025/CPE_613/GPGPU_project/detection.jpg', cv.IMREAD_GRAYSCALE)
+img = cv.imread('detection.jpg', cv.IMREAD_GRAYSCALE)
 assert img is not None, "file could not be read, check with os.path.exists()"
 img = cv.medianBlur(img,5)
 
 ret,th1 = cv.threshold(img,127,255,cv.THRESH_BINARY)
 th2 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_MEAN_C,\
             cv.THRESH_BINARY,11,2)
-th3 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,\
-            cv.THRESH_BINARY,11,2)
+#th3 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,\
+#            cv.THRESH_BINARY,11,2)
 
 titles = ['Original Image', 'Global Thresholding (v = 127)',
             'Adaptive Mean Thresholding', 'Adaptive Gaussian Thresholding']
-images = [img, th1, th2, th3]
+images = [img, th1, th2]
 
 for i in range(4):
     plt.subplot(2,2,i+1),plt.imshow(images[i],'gray')
