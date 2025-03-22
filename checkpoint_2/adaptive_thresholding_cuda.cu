@@ -55,7 +55,7 @@ __global__ void adaptiveThresholdKernel(const unsigned char* input_image, unsign
 
 int main() {
     // Load image using OpenCV
-    std::string image_path = "input_image.jpg"; // Replace with your image path
+    std::string image_path = "/home/paridhi/Projects/CPE_613/GPGPU_project/research/bg_image.jpg"; // Replace with your image path
     cv::Mat image = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
 
     if (image.empty()) {
