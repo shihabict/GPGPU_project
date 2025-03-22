@@ -16,7 +16,7 @@ __pycache__/
 *.mp4
 *.pt
 *.png
-
+*.ptx
 # Ignore IDE-specific files
 .vscode/
 .idea/
