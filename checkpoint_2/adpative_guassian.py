@@ -4,7 +4,7 @@ import cupy as cp
 import time
 
 # Load image
-image = cv2.imread('input_img.jpg', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('detection.jpg', cv2.IMREAD_GRAYSCALE)
 if image is None:
     raise ValueError("Could not load image!")
 
