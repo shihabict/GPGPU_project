@@ -3,7 +3,7 @@
 #include <string>
 #include <cuda_runtime.h>
 
-#define BLOCK_SIZE 11
+#define BLOCK_SIZE 16
 #define RADIUS 1 // For a 3x3 neighborhood
 
 // Adaptive threshold kernel
