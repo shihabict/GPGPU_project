@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time  # Import the time module
 
 def adaptive_thresholding(image, block_size, C):
 
@@ -46,10 +47,24 @@ if image is None:
 block_size = 11  # Size of the local neighborhood (must be odd)
 C = 2  # Constant subtracted from the mean
 
+# Start timing
+start_time = time.time()
+
 # Apply adaptive thresholding
 thresholded_image = adaptive_thresholding(image, block_size, C)
+
+# Stop timing
+end_time = time.time()
+
+# Calculate the elapsed time
+execution_time = end_time - start_time
 
 # Save the output image
 cv2.imwrite("image_adpt_python.jpg", thresholded_image)
 
+# Save execution time to file
+with open("host_side_metrics.txt", "w") as file:
+    file.write(f"Execution Time: {execution_time} seconds\n")
+
 print("Adaptive Thresholding completed and output image saved.")
+print(f"Execution Time: {execution_time} seconds")
