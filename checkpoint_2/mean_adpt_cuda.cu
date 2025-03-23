@@ -104,7 +104,7 @@ int main() {
     dim3 gridSize((image_width + blockSize.x - 1) / blockSize.x, (image_height + blockSize.y - 1) / blockSize.y);
 
     // Threshold constant (C) and block size (to adjust the neighborhood area)
-    int C = 10; // Example value, adjust according to your needs
+    int C = 10;
 
     // Create CUDA events for timing
     cudaEvent_t start, stop;
@@ -136,12 +136,12 @@ int main() {
     cudaMemcpy(h_output, d_output, image_width * image_height * sizeof(unsigned char), cudaMemcpyDeviceToHost);
 
     // Save output image (as raw file or any other format)
-    std::ofstream output_file("output_image.raw", std::ios::binary);
+    std::ofstream output_file("output_cuda_adpt_image.raw", std::ios::binary);
     output_file.write(reinterpret_cast<char*>(h_output), image_width * image_height * sizeof(unsigned char));
     output_file.close();
 
     // Save performance metrics to a text file
-    std::ofstream metrics_file("metrics.txt");
+    std::ofstream metrics_file("cuda_performance_metrics.txt");
     metrics_file << "Execution Time: " << milliseconds << " ms" << std::endl;
     metrics_file.close();
 
