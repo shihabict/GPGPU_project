@@ -3,7 +3,7 @@
 #include <string>
 #include <cuda_runtime.h>
 
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 11
 #define RADIUS 1 // For a 3x3 neighborhood
 
 // Adaptive threshold kernel
@@ -72,8 +72,8 @@ unsigned char* loadRawImage(const std::string& raw_image_path, int image_width, 
 
 int main() {
     // Paths to the raw image and metadata files
-    std::string raw_image_path = "detection.raw"; // Replace with your raw image path
-    std::string meta_file_path = "detection.raw.meta"; // Replace with your metadata file path
+    std::string raw_image_path = "detection.raw";
+    std::string meta_file_path = "detection.raw.meta";
 
     // Load image dimensions from metadata file
     int image_width = 0;
@@ -104,7 +104,7 @@ int main() {
     dim3 gridSize((image_width + blockSize.x - 1) / blockSize.x, (image_height + blockSize.y - 1) / blockSize.y);
 
     // Threshold constant (C) and block size (to adjust the neighborhood area)
-    int C = 10; // Example value, adjust according to your needs
+    int C = 2; 
 
     // Create CUDA events for timing
     cudaEvent_t start, stop;
