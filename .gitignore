@@ -35,3 +35,10 @@ env/
 *.csv
 main
 Makefile
+adaptive_thresholding_cuda.cu
+cuda_guassian_adptive.py
+implementation.py
+mean_based_at
+mean_based_adaptive_thresholding.cu
+python_guassian.py
+python_implementation.py
