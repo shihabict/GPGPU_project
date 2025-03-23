@@ -18,6 +18,11 @@ __pycache__/
 *.png
 *.ptx
 *.o
+*.qsub_out
+*.meta
+*.pbs
+*.raw
+*.txt
 # Ignore IDE-specific files
 .vscode/
 .idea/
@@ -28,3 +33,5 @@ env/
 *.pdf
 *.json
 *.csv
+main
+Makefile
