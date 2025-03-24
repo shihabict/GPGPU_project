@@ -2,6 +2,8 @@
 #include <fstream>
 #include <string>
 #include <cuda_runtime.h>
+#include <sys/stat.h>  // For directory creation
+#include <algorithm>   // For string manipulation
 
 #define BLOCK_SIZE 16
 #define RADIUS 1 // For a 3x3 neighborhood
@@ -70,10 +72,49 @@ unsigned char* loadRawImage(const std::string& raw_image_path, int image_width, 
     return image_data;
 }
 
-int main() {
+
+// Helper function to create directory if it doesn't exist
+void createDirectory(const std::string& path) {
+    struct stat st;
+    if (stat(path.c_str(), &st) != 0) {
+        mkdir(path.c_str(), 0777);
+    }
+}
+
+// Helper function to extract base name from path
+std::string getBaseName(const std::string& path) {
+    size_t last_slash = path.find_last_of("/\\");
+    size_t last_dot = path.find_last_of(".");
+
+    if (last_slash == std::string::npos) last_slash = 0;
+    else last_slash++;
+
+    if (last_dot == std::string::npos || last_dot < last_slash) {
+        return path.substr(last_slash);
+    }
+    return path.substr(last_slash, last_dot - last_slash);
+}
+
+int main(int argc, char* argv[]) {
     // Paths to the raw image and metadata files
-    std::string raw_image_path = "detection.raw";
-    std::string meta_file_path = "detection.raw.meta";
+//     std::string raw_image_path = "detection.raw";
+//     std::string meta_file_path = "detection.raw.meta";
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <raw_image_path> <meta_file_path>" << std::endl;
+        return -1;
+    }
+
+    std::string raw_image_path = argv[1];
+    std::string meta_file_path = argv[2];
+
+    // Get base name for output files
+    std::string base_name = getBaseName(raw_image_path);
+
+    // Create output directory
+    createDirectory("output_images");
+
+    // Create output directory
+    createDirectory("metrices");
 
     // Load image dimensions from metadata file
     int image_width = 0;
@@ -104,7 +145,7 @@ int main() {
     dim3 gridSize((image_width + blockSize.x - 1) / blockSize.x, (image_height + blockSize.y - 1) / blockSize.y);
 
     // Threshold constant (C) and block size (to adjust the neighborhood area)
-    int C = 2; 
+    int C = 2;
     // Create CUDA events for timing
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
@@ -134,14 +175,26 @@ int main() {
     // Copy output image back to host
     cudaMemcpy(h_output, d_output, image_width * image_height * sizeof(unsigned char), cudaMemcpyDeviceToHost);
 
-    // Save output image (as raw file or any other format)
-    std::ofstream output_file("output_cuda_adpt_image.raw", std::ios::binary);
+//     // Save output image (as raw file or any other format)
+//     std::ofstream output_file("output_cuda_adpt_image.raw", std::ios::binary);
+//     output_file.write(reinterpret_cast<char*>(h_output), image_width * image_height * sizeof(unsigned char));
+//     output_file.close();
+    // Save output image with base name in output_images directory
+    std::string output_image_path = "output_images/" + base_name + "_adpt_threshold_cuda.raw";
+    std::ofstream output_file(output_image_path, std::ios::binary);
     output_file.write(reinterpret_cast<char*>(h_output), image_width * image_height * sizeof(unsigned char));
     output_file.close();
 
-    // Save performance metrics to a text file
-    std::ofstream metrics_file("cuda_performance_metrics.txt");
-    metrics_file << "Execution Time: " << milliseconds << " ms" << std::endl;
+//     // Save performance metrics to a text file
+//     std::ofstream metrics_file("cuda_performance_metrics.txt");
+//     metrics_file << "Execution Time: " << milliseconds << " ms" << std::endl;
+//     metrics_file.close();
+    // Save performance metrics with base name
+    std::string metrics_path = "metrices/" + base_name + "_performance_metrics_cuda.txt";
+    std::ofstream metrics_file(metrics_path);
+    metrics_file << "Input Image: " << base_name << "\n";
+    metrics_file << "Execution Time: " << milliseconds << " ms\n";
+    metrics_file << "Output Image: " << output_image_path << std::endl;
     metrics_file.close();
 
     // Free device memory
@@ -157,4 +210,5 @@ int main() {
 
     return 0;
 }
+
 
