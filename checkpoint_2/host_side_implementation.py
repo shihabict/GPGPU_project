@@ -36,7 +36,7 @@ def adaptive_thresholding(image, block_size, C):
     return output
 
 # Load an image in grayscale mode
-image = cv2.imread("detection.jpg", cv2.IMREAD_GRAYSCALE)
+image = cv2.imread("input_images/detection.jpg", cv2.IMREAD_GRAYSCALE)
 
 # Check if the image was loaded successfully
 if image is None:
