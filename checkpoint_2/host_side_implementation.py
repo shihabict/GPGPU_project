@@ -1,9 +1,12 @@
 import cv2
 import numpy as np
-import time  # Import the time module
+import time
+import os
+import sys
+from pathlib import Path
+
 
 def adaptive_thresholding(image, block_size, C):
-
     # Ensure the block size is odd
     if block_size % 2 == 0:
         block_size += 1
@@ -35,36 +38,60 @@ def adaptive_thresholding(image, block_size, C):
 
     return output
 
-# Load an image in grayscale mode
-image = cv2.imread("input_images/detection.jpg", cv2.IMREAD_GRAYSCALE)
 
-# Check if the image was loaded successfully
-if image is None:
-    print("Error: Could not load image.")
-    exit()
+def main():
+    # Check command-line arguments
+    if len(sys.argv) != 2:
+        print("Usage: python adaptive_threshold.py <input_image_path>")
+        sys.exit(1)
 
-# Define parameters for adaptive thresholding
-block_size = 11  # Size of the local neighborhood (must be odd)
-C = 2  # Constant subtracted from the mean
+    input_path = sys.argv[1]
 
-# Start timing
-start_time = time.time()
+    # Create directories if they don't exist
+    os.makedirs("output_images", exist_ok=True)
+    os.makedirs("metrics", exist_ok=True)
 
-# Apply adaptive thresholding
-thresholded_image = adaptive_thresholding(image, block_size, C)
+    # Get the base filename without extension
+    input_filename = Path(input_path).stem
 
-# Stop timing
-end_time = time.time()
+    # Load the image in grayscale mode
+    image = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
 
-# Calculate the elapsed time
-execution_time = end_time - start_time
+    # Check if the image was loaded successfully
+    if image is None:
+        print(f"Error: Could not load image at {input_path}")
+        sys.exit(1)
 
-# Save the output image
-cv2.imwrite("image_adpt_python.jpg", thresholded_image)
+    # Define parameters for adaptive thresholding
+    block_size = 11  # Size of the local neighborhood (must be odd)
+    C = 2  # Constant subtracted from the mean
 
-# Save execution time to file
-with open("host_side_metrics.txt", "w") as file:
-    file.write(f"Execution Time: {execution_time} seconds\n")
+    # Start timing
+    start_time = time.time()
 
-print("Adaptive Thresholding completed and output image saved.")
-print(f"Execution Time: {execution_time} seconds")
+    # Apply adaptive thresholding
+    thresholded_image = adaptive_thresholding(image, block_size, C)
+
+    # Stop timing
+    end_time = time.time()
+
+    # Calculate the elapsed time
+    execution_time = end_time - start_time
+
+    # Define output paths
+    output_image_path = f"output_images/output_{input_filename}_host.jpg"
+    metrics_path = f"metrics/metrics_{input_filename}_host.txt"
+
+    # Save the output image
+    cv2.imwrite(output_image_path, thresholded_image)
+
+    # Save execution time to file
+    with open(metrics_path, "w") as file:
+        file.write(f"Execution Time: {execution_time:.4f} seconds\n")
+
+    print(f"Output Image saved to: {output_image_path}")
+
+
+
+if __name__ == "__main__":
+    main()
