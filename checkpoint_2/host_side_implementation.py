@@ -11,26 +11,26 @@ def adaptive_thresholding(image, block_size, C):
     if block_size % 2 == 0:
         block_size += 1
 
-    # Get image dimensions
+    # image dimensions extraction
     height, width = image.shape
 
-    # Create an empty output image
+    # empty output image
     output = np.zeros_like(image)
 
-    # Pad the image to handle border pixels
+    # Padding to handle border pixels
     pad = block_size // 2
     padded_image = cv2.copyMakeBorder(image, pad, pad, pad, pad, cv2.BORDER_REFLECT)
 
-    # Apply adaptive thresholding
+    # adaptive thresholding
     for y in range(height):
         for x in range(width):
-            # Extract the local neighborhood
+            # local neighborhood extraction
             neighborhood = padded_image[y:y + block_size, x:x + block_size]
-            # Compute the mean of the neighborhood
+            # mean of the neighborhood
             mean = np.mean(neighborhood)
-            # Compute the threshold
+            # threshold computation
             threshold = mean - C
-            # Classify the pixel
+            # pixel classification
             if image[y, x] > threshold:
                 output[y, x] = 255  # Foreground
             else:
@@ -47,23 +47,23 @@ def main():
 
     input_path = sys.argv[1]
 
-    # Create directories if they don't exist
+    # Create directories
     os.makedirs("output_images", exist_ok=True)
     os.makedirs("metrics", exist_ok=True)
 
-    # Get the base filename without extension
+    # Get the base filename
     input_filename = Path(input_path).stem
 
-    # Load the image in grayscale mode
+    # load image in grayscale mode
     image = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
 
-    # Check if the image was loaded successfully
+    # Check if the image not empty
     if image is None:
         print(f"Error: Could not load image at {input_path}")
         sys.exit(1)
 
     # Define parameters for adaptive thresholding
-    block_size = 11  # Size of the local neighborhood (must be odd)
+    block_size = 11  # Size of the local neighborhood
     C = 2  # Constant subtracted from the mean
 
     # Start timing
