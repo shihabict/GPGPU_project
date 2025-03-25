@@ -3,8 +3,9 @@
 data/
 gpgpuenv/
 gpuenv/
-output_image/
+output_images/
 input_images/
+metrices/
 __pycache__/
 # Ignore Jupyter Notebook checkpoints (if using notebooks)
 .ipynb_checkpoints/
