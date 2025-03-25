@@ -49,32 +49,7 @@ C = 2  # Constant subtracted from the mean
 # Apply adaptive thresholding
 thresholded_image = adaptive_thresholding(image, block_size, C)
 
-# Convert the thresholded image to 3 channels (to match the original image if it's not grayscale)
-thresholded_image_bgr = cv2.cvtColor(thresholded_image, cv2.COLOR_GRAY2BGR)
-
-# Convert the original grayscale image to 3 channels (for side-by-side display)
-if len(image.shape) == 2:
-    image_bgr = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-else:
-    image_bgr = image
-
-# Concatenate the original and thresholded images side by side
-side_by_side = np.hstack((image_bgr, thresholded_image_bgr))
-
-# Resize the concatenated image to fit the screen
-scale_percent = 50  # Resize to 50% of the original size
-width = int(side_by_side.shape[1] * scale_percent / 100)
-height = int(side_by_side.shape[0] * scale_percent / 100)
-resized_side_by_side = cv2.resize(side_by_side, (width, height))
-
-# Create a resizable window
-cv2.namedWindow("Original vs Adaptive Thresholded", cv2.WINDOW_NORMAL)
-
-# Display the resized images side by side
-cv2.imshow("Original vs Adaptive Thresholded", resized_side_by_side)
-
 # Save the output image
 cv2.imwrite("image_adpt_python.jpg", thresholded_image)
 
-# Wait for a key press and close the window
-cv2.waitKey(0)
+print("Adaptive Thresholding completed and output image saved.")

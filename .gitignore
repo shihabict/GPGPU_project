@@ -3,9 +3,8 @@
 data/
 gpgpuenv/
 gpuenv/
-checkpoint_2/output_images/
-checkpoint_2/input_images/
-checkpoint_2/metrices/
+output_image/
+input_images/
 __pycache__/
 # Ignore Jupyter Notebook checkpoints (if using notebooks)
 .ipynb_checkpoints/
@@ -21,6 +20,11 @@ __pycache__/
 *.png
 *.ptx
 *.o
+*.qsub_out
+*.meta
+*.pbs
+*.raw
+*.txt
 # Ignore IDE-specific files
 .vscode/
 .idea/
@@ -31,3 +35,13 @@ env/
 *.pdf
 *.json
 *.csv
+main
+Makefile
+adaptive_thresholding_cuda.cu
+cuda_guassian_adptive.py
+implementation.py
+mean_based_at
+mean_based_adaptive_thresholding.cu
+python_guassian.py
+python_implementation.py
+test.py
