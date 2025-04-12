@@ -15,7 +15,7 @@ def convert_to_raw(image_path, output_raw=None):
     img_array.tofile(output_raw)
 
     # Save image dimensions
-    metadata_file = output_raw + ".meta"
+    metadata_file = "input_images/"+ output_raw + ".meta"
     with open(metadata_file, "w") as f:
         f.write(f"{img.width} {img.height}")
 
