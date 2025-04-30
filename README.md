@@ -39,7 +39,7 @@ GPGPU_Project/
 ├── scripts/
 │   ├── jpg_to_raw.py
 │   ├── raw_to_jpg.py
-├── inputs/
+├── input_images/
 │   └── sample_image.jpg
 ├── research/
 ├── requirements.txt
