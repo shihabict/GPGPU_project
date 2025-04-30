@@ -34,7 +34,8 @@ GPGPU_Project/
 │       ├── main.cu 
 │       ├── Makefile
 │       ├── run_me.sh
-│       └── submission.pbs   
+│       └── submission.pbs
+│     ├── metrices/  
 ├── scripts/
 │   ├── jpg_to_raw.py
 │   ├── raw_to_jpg.py
@@ -45,3 +46,32 @@ GPGPU_Project/
 ├── README.md 
 └── submission.pbs
 ```
+## 🛠️ Build Instructions
+Navigate to the final optimized checkpoint3:
+### Baseline implementation
+```bash 
+cd src/checkpoint3/
+```
+To generate JPG to RAW (Optional, already saved into the  inputs directory)
+```bash
+python ../scripts/jpg_to_raw.py image_path ----output
+```
+
+Build and run the code using the provided shell file:
+```bash
+./run_me.sh img.raw img.raw.meta
+```
+Metrics will be saved in the metrics directory.
+
+### Optimized Implementation (APOD)
+Build and run the code using the provided shell file:
+```bash
+./run_me.sh img.raw img.raw.meta
+```
+Metrics will be saved in the metrics directory.
+
+To generate RAW to JPG 
+```bash
+python ../scripts/raw_to_jpg.py raw_image_path meta_path
+```
+
