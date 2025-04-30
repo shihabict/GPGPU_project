@@ -13,7 +13,7 @@ This project implements a GPU-accelerated **adaptive thresholding** technique fo
   - `numpy`
   - `Pillow` (PIL)
 
-Tested on ASA and RCHAU GPU servers.
+Tested on ASAX GPU servers.
 
 ---
 
