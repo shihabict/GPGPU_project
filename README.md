@@ -43,8 +43,7 @@ GPGPU_Project/
 │   └── sample_image.jpg
 ├── research/
 ├── requirements.txt
-├── README.md 
-└── submission.pbs
+└── README.md 
 ```
 ## 🛠️ Build Instructions
 Navigate to the final optimized checkpoint3:
