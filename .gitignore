@@ -37,7 +37,6 @@ env/
 *.json
 *.csv
 main
-Makefile
 adaptive_thresholding_cuda.cu
 cuda_guassian_adptive.py
 implementation.py
