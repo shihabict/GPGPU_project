@@ -13,7 +13,7 @@ cd $PBS_O_WORKDIR
 # Add CUDA binaries to path
 export PATH=$PATH:/apps/x86-64/apps/cuda_12.6.0/bin
 
-# Load CUDA module (if required by system's environment)
+# Load CUDA module
 module load cuda
 
 # List NVIDIA GPUs (just for logging/debugging)
@@ -23,14 +23,14 @@ lspci -vvv | grep "NVIDIA"
 make clean
 make main
 
-# Run your application (without profiling) - Optional
+# Run your application
 ./main $INPUT_IMAGE $INPUT_META
 
-# Run with Nsight Systems (Timeline View)
+# Run with Nsight Systems
 echo "Running Nsight Systems..."
 nsys profile -o checkpoint3_nsys --force-overwrite true ./main $INPUT_IMAGE $INPUT_META
 
-# Run with Nsight Compute (Kernel Performance Details)
+# Run with Nsight Compute
 echo "Running Nsight Compute..."
 ncu --force-overwrite true -o checkpoint3_ncu ./main $INPUT_IMAGE $INPUT_META
 
