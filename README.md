@@ -18,7 +18,7 @@ Tested on ASA and RCHAU GPU servers.
 ---
 
 ## 📁 Repository Structure
-
+```bash
 GPGPU_Project/
 ├── src/
 │   ├── checkpoint2/
@@ -44,3 +44,4 @@ GPGPU_Project/
 ├── requirements.txt
 ├── README.md 
 └── submission.pbs
+```
