@@ -15,7 +15,7 @@ __global__ void adaptiveThresholdKernel(const unsigned char* input, unsigned cha
     int x = blockIdx.x * blockDim.x + tx;
     int y = blockIdx.y * blockDim.y + ty;
 
-    int sharedSize = blockSize + 2 * RADIUS;
+    //int sharedSize = blockSize + 2 * RADIUS;
     __shared__ unsigned char tile[BLOCK_SIZE + 2 * RADIUS][BLOCK_SIZE + 2 * RADIUS];
 
     // Global coordinates of the shared memory element
