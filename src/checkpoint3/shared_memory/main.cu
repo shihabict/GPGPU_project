@@ -2,11 +2,11 @@
 #include <fstream>
 #include <string>
 #include <cuda_runtime.h>
-#include <sys/stat.h>  // For directory creation
-#include <algorithm>   // For string manipulation
+#include <sys/stat.h> 
+#include <algorithm>
 
 #define BLOCK_SIZE 16
-#define RADIUS 1 // For a 3x3 neighborhood
+#define RADIUS 1
 
 __global__ void adaptiveThresholdKernel(const unsigned char* input, unsigned char* output, int width, int height, int blockSize, int C) {
     // Thread and block coordinates
@@ -15,20 +15,16 @@ __global__ void adaptiveThresholdKernel(const unsigned char* input, unsigned cha
     int x = blockIdx.x * blockDim.x + tx;
     int y = blockIdx.y * blockDim.y + ty;
 
-    //int sharedSize = blockSize + 2 * RADIUS;
     __shared__ unsigned char tile[BLOCK_SIZE + 2 * RADIUS][BLOCK_SIZE + 2 * RADIUS];
 
-    // Global coordinates of the shared memory element
     int sharedX = tx + RADIUS;
     int sharedY = ty + RADIUS;
 
-    // Load the central data
     if (x < width && y < height)
         tile[sharedY][sharedX] = input[y * width + x];
     else
         tile[sharedY][sharedX] = 0;
 
-    // Load the halo (padding) data
     if (tx < RADIUS) {
         // Left
         int x_left = x - RADIUS;
@@ -61,9 +57,8 @@ __global__ void adaptiveThresholdKernel(const unsigned char* input, unsigned cha
         tile[sharedY + RADIUS][sharedX + RADIUS] = (x_corner < width && y_corner < height) ? input[y_corner * width + x_corner] : 0;
     }
 
-    __syncthreads();  // Ensure all shared memory is loaded
+    __syncthreads(); 
 
-    // Perform local mean filtering from shared memory
     if (x < width && y < height) {
         int sum = 0;
         int count = 0;
@@ -82,7 +77,6 @@ __global__ void adaptiveThresholdKernel(const unsigned char* input, unsigned cha
 }
 
 
-// Function to read image dimensions from metadata file
 bool readMetaFile(const std::string& meta_file_path, int& image_width, int& image_height) {
     std::ifstream meta_file(meta_file_path);
     if (!meta_file.is_open()) {
@@ -90,26 +84,22 @@ bool readMetaFile(const std::string& meta_file_path, int& image_width, int& imag
         return false;
     }
 
-    // Read the width and height from the metadata file
     meta_file >> image_width >> image_height;
 
     meta_file.close();
     return true;
 }
 
-// Function to load raw image from file
 unsigned char* loadRawImage(const std::string& raw_image_path, int image_width, int image_height) {
-    // Open raw image file in binary mode
+
     std::ifstream file(raw_image_path, std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Error: Could not open raw image file!" << std::endl;
         return nullptr;
     }
 
-    // Allocate memory for the image
     unsigned char* image_data = new unsigned char[image_width * image_height];
 
-    // Read image data into the array
     file.read(reinterpret_cast<char*>(image_data), image_width * image_height * sizeof(unsigned char));
     file.close();
 
@@ -117,7 +107,7 @@ unsigned char* loadRawImage(const std::string& raw_image_path, int image_width, 
 }
 
 
-// Helper function to create directory if it doesn't exist
+
 void createDirectory(const std::string& path) {
     struct stat st;
     if (stat(path.c_str(), &st) != 0) {
@@ -125,7 +115,7 @@ void createDirectory(const std::string& path) {
     }
 }
 
-// Helper function to extract base name from path
+
 std::string getBaseName(const std::string& path) {
     size_t last_slash = path.find_last_of("/\\");
     size_t last_dot = path.find_last_of(".");
@@ -140,9 +130,6 @@ std::string getBaseName(const std::string& path) {
 }
 
 int main(int argc, char* argv[]) {
-    // Paths to the raw image and metadata files
-//     std::string raw_image_path = "detection.raw";
-//     std::string meta_file_path = "detection.raw.meta";
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <raw_image_path> <meta_file_path>" << std::endl;
         return -1;
@@ -151,38 +138,29 @@ int main(int argc, char* argv[]) {
     std::string raw_image_path = argv[1];
     std::string meta_file_path = argv[2];
 
-    // Get base name for output files
     std::string base_name = getBaseName(raw_image_path);
 
-    // Create output directory
     createDirectory("output_images");
 
-    // Create output directory
     createDirectory("metrices");
 
-    // Load image dimensions from metadata file
     int image_width = 0;
     int image_height = 0;
     if (!readMetaFile(meta_file_path, image_width, image_height)) {
         return -1;
     }
 
-    // Load raw image using the dimensions from metadata
     unsigned char* h_input = loadRawImage(raw_image_path, image_width, image_height);
     if (h_input == nullptr) {
         return -1;
     }
 
-    // Allocate host memory for output image
     unsigned char* h_output = new unsigned char[image_width * image_height];
 
-    // Allocate device memory
     unsigned char *d_input, *d_output;
     cudaMalloc((void**)&d_input, image_width * image_height * sizeof(unsigned char));
     cudaMalloc((void**)&d_output, image_width * image_height * sizeof(unsigned char));
 
-    // Copy input image to device
-   // cudaMemcpy(d_input, h_input, image_width * image_height * sizeof(unsigned char), cudaMemcpyHostToDevice);
     float h2d_ms = 0.0f;
     cudaEvent_t h2d_start, h2d_stop;
     cudaEventCreate(&h2d_start);
@@ -196,40 +174,31 @@ int main(int argc, char* argv[]) {
     cudaEventElapsedTime(&h2d_ms, h2d_start, h2d_stop);
     std::cout << "Host to Device Copy Time: " << h2d_ms << " ms" << std::endl;
 
-    // Define block and grid sizes
     dim3 blockSize(BLOCK_SIZE, BLOCK_SIZE);
     dim3 gridSize((image_width + blockSize.x - 1) / blockSize.x, (image_height + blockSize.y - 1) / blockSize.y);
 
-    // Threshold constant (C) and block size (to adjust the neighborhood area)
     int C = 2;
-    // Create CUDA events for timing
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
 
-    // Start timing
     cudaEventRecord(start);
 
-    // Launch the adaptive threshold kernel
     adaptiveThresholdKernel<<<gridSize, blockSize>>>(d_input, d_output, image_width, image_height, BLOCK_SIZE, C);
 
-    // Check for kernel errors
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
         std::cerr << "CUDA kernel error: " << cudaGetErrorString(err) << std::endl;
         return -1;
     }
 
-    // Stop timing
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
 
-    // Calculate elapsed time
+
     float milliseconds = 0;
     cudaEventElapsedTime(&milliseconds, start, stop);
 
-    // Copy output image back to host
-    //cudaMemcpy(h_output, d_output, image_width * image_height * sizeof(unsigned char), cudaMemcpyDeviceToHost);
     float d2h_ms = 0.0f;
     cudaEvent_t d2h_start, d2h_stop;
     cudaEventCreate(&d2h_start);
@@ -243,21 +212,11 @@ int main(int argc, char* argv[]) {
     cudaEventElapsedTime(&d2h_ms, d2h_start, d2h_stop);
     std::cout << "Device to Host Copy Time: " << d2h_ms << " ms" << std::endl;
 
-//     // Save output image (as raw file or any other format)
-//     std::ofstream output_file("output_cuda_adpt_image.raw", std::ios::binary);
-//     output_file.write(reinterpret_cast<char*>(h_output), image_width * image_height * sizeof(unsigned char));
-//     output_file.close();
-    // Save output image with base name in output_images directory
     std::string output_image_path = "output_images/" + base_name + "_adpt_threshold_cuda.raw";
     std::ofstream output_file(output_image_path, std::ios::binary);
     output_file.write(reinterpret_cast<char*>(h_output), image_width * image_height * sizeof(unsigned char));
     output_file.close();
 
-//     // Save performance metrics to a text file
-//     std::ofstream metrics_file("cuda_performance_metrics.txt");
-//     metrics_file << "Execution Time: " << milliseconds << " ms" << std::endl;
-//     metrics_file.close();
-    // Save performance metrics with base name
     std::string metrics_path = "metrices/" + base_name + "_performance_metrics_cuda.txt";
     std::ofstream metrics_file(metrics_path);
     metrics_file << "Input Image: " << base_name << "\n";
@@ -268,11 +227,9 @@ int main(int argc, char* argv[]) {
     metrics_file << "Output Image: " << output_image_path << std::endl;
     metrics_file.close();
 
-    // Free device memory
     cudaFree(d_input);
     cudaFree(d_output);
 
-    // Free host memory
     delete[] h_input;
     delete[] h_output;
 
