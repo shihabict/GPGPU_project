@@ -1,6 +1,0 @@
-.PHONY: clean
-
-main: main.cu
-	nvcc -o main main.cu
-clean:
-	rm -f main
