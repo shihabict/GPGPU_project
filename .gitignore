@@ -3,6 +3,8 @@
 data/
 gpgpuenv/
 gpuenv/
+checkpoint_2/
+checkpoint_3/
 output_images/
 input_images/
 metrices/
