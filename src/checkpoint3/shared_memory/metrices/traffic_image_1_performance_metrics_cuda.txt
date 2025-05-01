@@ -1,0 +1,5 @@
+Input Image: traffic_image_1
+Execution Time: 8.58317 ms
+Host to Device Copy Time: 0.078432 ms
+Device to Host Copy Time: 0.200448 ms
+Output Image: output_images/traffic_image_1_adpt_threshold_cuda.raw

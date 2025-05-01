@@ -1,0 +1,3 @@
+Input Image: traffic_image_1
+Execution Time: 1.79418 ms
+Output Image: output_images/traffic_image_1_adpt_threshold_cuda.raw
