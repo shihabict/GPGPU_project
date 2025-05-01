@@ -54,7 +54,7 @@ Navigate to the final optimized checkpoint3:
 ```bash 
 cd src/checkpoint3/
 ```
-To generate JPG to RAW (Optional, already saved into the  inputs directory)
+To generate JPG to RAW (Optional, already saved into the input_images directory)
 ```bash
 python ../scripts/jpg_to_raw.py image_path --output
 ```
