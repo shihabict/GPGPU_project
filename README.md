@@ -22,6 +22,8 @@ Tested on ASAX GPU servers.
 GPGPU_Project/
 ├── src/
 │   ├── checkpoint2/
+│     ├── metrices/ 
+│     ├── output_images/
 │     ├── host_side_implementation.py
 │     ├── main.cu
 │     └── Makefile 
@@ -29,7 +31,8 @@ GPGPU_Project/
 │     ├── main.cu 
 │     ├── Makefile
 │     ├── run_me.sh
-│     └── submission.pbs
+│     ├── submission.pbs
+│     ├── output_images/
 │     ├── optimization/
 │       ├── main.cu 
 │       ├── Makefile
