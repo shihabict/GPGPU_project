@@ -9,7 +9,7 @@ This project implements a GPU-accelerated **adaptive thresholding** technique fo
 ## ⚙️ Dependencies
 
 - CUDA Toolkit: **12.6**
-- Python (for pre/post-processing scripts): **>=3.6**
+- Python (for pre/post-processing scripts): **>=3.8**
   - `numpy`
   - `Pillow` (PIL)
 
@@ -53,7 +53,7 @@ cd src/checkpoint3/
 ```
 To generate JPG to RAW (Optional, already saved into the  inputs directory)
 ```bash
-python ../scripts/jpg_to_raw.py image_path ----output
+python ../scripts/jpg_to_raw.py image_path --output
 ```
 
 Build and run the code using the provided shell file:
