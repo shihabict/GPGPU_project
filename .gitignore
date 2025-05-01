@@ -6,8 +6,7 @@ gpuenv/
 checkpoint_2/
 checkpoint_3/
 output_images/
-input_images/
-metrices/
+slide/
 __pycache__/
 # Ignore Jupyter Notebook checkpoints (if using notebooks)
 .ipynb_checkpoints/
